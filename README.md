@@ -1,23 +1,43 @@
-# Project NORMANDY
+# Normandy
 
-Shoot some Reapers.
+A Python-based space shooter game built with Pygame.
 
-Just a small personal project.
+## Quick Start
 
-
-## How to RUN
-
-run from source (needs pygame module)
-
+1. Clone this repository:
 ```bash
-  python normandy.py
+git clone https://github.com/yourusername/normandy.git
+cd normandy
 ```
 
+2. Install Pygame:
+```bash
+pip install pygame
+```
+
+3. Run the game:
+```bash
+python normandy.py
+```
 
 ## Controls
 
-Q - Exit
+- **Arrow Keys**: Move the ship
+- **Space**: Fire bullets
+- **Enter**: Start game/Confirm
+- **ESC**: Quit game
 
-Space - Shoot
+## Project Structure
 
-Right/Left Arrows - Move
+- `normandy.py`: Main game file
+- `settings.py`: Game settings and configuration
+- `ship.py`: Player ship implementation
+- `bullet.py`: Bullet mechanics
+- `alien.py`: Alien behavior
+- `game_functions.py`: Core game functions
+- `scoreboard.py`: Score and UI
+- `explosion.py`: Particle effects
+
+## License
+
+MIT License
