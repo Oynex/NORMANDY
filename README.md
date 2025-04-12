@@ -4,18 +4,14 @@ A Python-based space shooter game built with Pygame.
 
 ## Quick Start
 
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/normandy.git
-cd normandy
-```
+=======
+1. Install Pygame:
 
-2. Install Pygame:
 ```bash
 pip install pygame
 ```
-
-3. Run the game:
+=======
+2. Run the game:
 ```bash
 python normandy.py
 ```
