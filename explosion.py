@@ -32,4 +32,8 @@ class Explosion(Sprite):
             if self.frame == len(self.frames):
                 self.kill()  # Remove the explosion when animation is complete
             else:
-                self.image = self.frames[self.frame] 
+                self.image = self.frames[self.frame]
+    
+    def draw(self, screen):
+        # Draw the current frame of the explosion on the screen
+        screen.blit(self.image, self.rect)

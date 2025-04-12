@@ -67,26 +67,31 @@ def fire_bullet(ai_settings, screen, ship, bullets):
         new_bullet = Bullet(ai_settings, screen, ship)
         bullets.add(new_bullet)
 
-def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets):
+def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
     # Update bullet positions.
     bullets.update()
     # Get rid of bullets that have disappeared.
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
-    check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets)
+    check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions)
 
-def check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets):
+def update_explosions(explosions):
+    """Update and remove finished explosions."""
+    for explosion in explosions.copy():
+        explosion.update()  # Update the explosion animation
+        # No need to check for 'finished', as 'self.kill()' removes it automatically
+
+def check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
     """Respond to bullet-alien collisions."""
-    # Remove any bullets and aliens that have collided.
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
-    
+
     if collisions:
         for aliens_hit in collisions.values():
             for alien in aliens_hit:
                 # Create explosion at alien's position
                 explosion = Explosion(alien.rect.center, alien.rect.width)
-                aliens.add(explosion)  # Add explosion to aliens group so it gets drawn
+                explosions.add(explosion)  # Add explosion to explosions group
             stats.score += ai_settings.alien_points * len(aliens_hit)
             sb.prep_score()
         check_high_score(stats, sb)
@@ -181,12 +186,17 @@ def update_aliens(ai_settings, screen, stats, sb, ship, aliens, bullets):
 
 
 
-def update_screen(bg, screen, stats, sb, ship, aliens, bullets, play_button):
-    screen.blit(bg,(0,0))
+def update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions, play_button):
+    screen.blit(bg, (0, 0))
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+
+    # Draw explosions
+    for explosion in explosions:
+        explosion.draw(screen)
+
     sb.show_score()
     if not stats.game_active:
         play_button.draw_button()

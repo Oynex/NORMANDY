@@ -23,6 +23,8 @@ def rundagame():
     # Active bullet storage
     bullets = Group()
     aliens = Group()
+    # Active explosion storage
+    explosions = Group()
     # call the reaper
     # Create the fleet of aliens.
     gf.create_fleet(ai_settings, screen, ship, aliens)
@@ -38,10 +40,11 @@ def rundagame():
         if stats.game_active:
 
             ship.update()
-            gf.update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets)
+            gf.update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions)
             gf.update_aliens(ai_settings, screen, stats, sb, ship, aliens, bullets)
+            gf.update_explosions(explosions)
 
-        gf.update_screen(bg, screen, stats, sb, ship, aliens, bullets, play_button)
+        gf.update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions, play_button)
 
 
 rundagame()
