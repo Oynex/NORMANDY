@@ -25,37 +25,18 @@ def check_keyup_events(event, ship):
     elif event.key == pygame.K_LEFT:
         ship.moving_left = False
 
-def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets):
+def check_events(ai_settings, screen, stats, sb, ship, aliens, bullets):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, mouse_x, mouse_y)
         elif event.type == pygame.KEYDOWN:
             check_keydown_events(event, ai_settings, screen, ship, bullets)
-
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
 
-def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, mouse_x, mouse_y):
-    button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
-    if button_clicked and not stats.game_active:
-        # Reset the game settings.
-        ai_settings.initialize_dynamic_settings()
-        # Hide the mouse cursor.
-        pygame.mouse.set_visible(False)
-        stats.game_active = True
-        # Reset the scoreboard images.
-        sb.prep_score()
-        sb.prep_high_score()
-        sb.prep_level()
-        sb.prep_ships()
-        #empty everything
-        aliens.empty()
-        bullets.empty()
-        create_fleet(ai_settings, screen, ship, aliens)
-        ship.center_ship()
+def check_play_button(ai_settings, screen, stats, sb, ship, aliens, bullets, mouse_x, mouse_y):
+    # Removed the play_button argument as it is now obsolete
+    pass  # Functionality removed as play_button is no longer used
 
 def check_high_score(stats, sb):
     if stats.score > stats.high_score:
@@ -186,7 +167,8 @@ def update_aliens(ai_settings, screen, stats, sb, ship, aliens, bullets):
 
 
 
-def update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions, play_button):
+def update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions):
+    # Removed play_button from the function signature as it is now obsolete
     screen.blit(bg, (0, 0))
     for bullet in bullets.sprites():
         bullet.draw_bullet()
@@ -198,6 +180,4 @@ def update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions, play
         explosion.draw(screen)
 
     sb.show_score()
-    if not stats.game_active:
-        play_button.draw_button()
     pygame.display.flip()
