@@ -37,7 +37,3 @@ python normandy.py
 - `game_functions.py`: Core game functions
 - `scoreboard.py`: Score and UI
 - `explosion.py`: Particle effects
-
-## License
-
-MIT License
