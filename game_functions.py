@@ -8,13 +8,17 @@ from explosion import Explosion
 
 
 
-def check_keydown_events(event, ai_settings, screen, ship, bullets):
+def check_keydown_events(event, ai_settings, screen, stats, sb, ship, aliens, bullets):
     if event.key == pygame.K_RIGHT:
         ship.moving_right = True
     elif event.key ==  pygame.K_LEFT:  
         ship.moving_left = True
     elif event.key == pygame.K_SPACE:
         fire_bullet(ai_settings, screen, ship, bullets)
+    elif event.key == pygame.K_r:
+        fire_fat_bullet(ai_settings, screen, ship, bullets)
+    elif event.key == pygame.K_t:  # Debug key to lose a life
+        ship_hit(ai_settings, screen, stats, sb, ship, aliens, bullets)
     elif event.key == pygame.K_q:
         sys.exit()
 
@@ -30,7 +34,11 @@ def check_events(ai_settings, screen, stats, sb, ship, aliens, bullets):
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, ship, bullets)
+            if event.key == pygame.K_p and not stats.game_active:
+                # Start a new game when P is pressed
+                start_game(ai_settings, screen, stats, sb, ship, aliens, bullets)
+            else:
+                check_keydown_events(event, ai_settings, screen, stats, sb, ship, aliens, bullets)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
 
@@ -46,6 +54,12 @@ def check_high_score(stats, sb):
 def fire_bullet(ai_settings, screen, ship, bullets):
     if len(bullets) < ai_settings.bullets_allowed:
         new_bullet = Bullet(ai_settings, screen, ship)
+        bullets.add(new_bullet)
+
+def fire_fat_bullet(ai_settings, screen, ship, bullets):
+    """Fire a fat bullet if within bullet limit."""
+    if len(bullets) < ai_settings.bullets_allowed:
+        new_bullet = Bullet(ai_settings, screen, ship, is_fat=True)
         bullets.add(new_bullet)
 
 def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
@@ -65,6 +79,22 @@ def update_explosions(explosions):
 
 def check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
     """Respond to bullet-alien collisions."""
+    # Check for fat bullet collisions first
+    for bullet in bullets.sprites():
+        if bullet.is_fat:
+            # Get all aliens that collide with the fat bullet
+            fat_collisions = pygame.sprite.spritecollide(bullet, aliens, True)
+            if fat_collisions:
+                for alien in fat_collisions:
+                    # Create explosion at alien's position
+                    explosion = Explosion(alien.rect.center, alien.rect.width)
+                    explosions.add(explosion)
+                stats.score += ai_settings.alien_points * len(fat_collisions)
+                sb.prep_score()
+                check_high_score(stats, sb)
+            break  # Only one fat bullet at a time
+
+    # Check for normal bullet collisions
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
 
     if collisions:
@@ -72,21 +102,29 @@ def check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, 
             for alien in aliens_hit:
                 # Create explosion at alien's position
                 explosion = Explosion(alien.rect.center, alien.rect.width)
-                explosions.add(explosion)  # Add explosion to explosions group
+                explosions.add(explosion)
             stats.score += ai_settings.alien_points * len(aliens_hit)
             sb.prep_score()
         check_high_score(stats, sb)
     
-    if len(aliens) == 0:
-        # If the entire fleet is destroyed, start a new level.
+    # Check if all aliens are destroyed and all explosions are finished
+    if len(aliens) == 0 and len(explosions) == 0:
+        # If the entire fleet is destroyed and all explosions are done, start a new level
         bullets.empty()
         ai_settings.increase_speed()
         
-        # Increase level.
+        # Increase level
         stats.level += 1
         sb.prep_level()
+        
+        # Create new fleet
         create_fleet(ai_settings, screen, ship, aliens)
-
+        
+        # Center the ship
+        ship.center_ship()
+        
+        # Pause briefly to show level transition
+        pygame.time.delay(500)  # 500ms pause
 
 def get_number_aliens_x(ai_settings, alien_width):
     available_space_x = ai_settings.screen_width - 2 * alien_width
@@ -168,16 +206,64 @@ def update_aliens(ai_settings, screen, stats, sb, ship, aliens, bullets):
 
 
 def update_screen(bg, screen, stats, sb, ship, aliens, bullets, explosions):
-    # Removed play_button from the function signature as it is now obsolete
     screen.blit(bg, (0, 0))
-    for bullet in bullets.sprites():
-        bullet.draw_bullet()
-    ship.blitme()
-    aliens.draw(screen)
-
-    # Draw explosions
-    for explosion in explosions:
-        explosion.draw(screen)
-
-    sb.show_score()
+    
+    if stats.game_active:
+        # Draw game elements
+        for bullet in bullets.sprites():
+            bullet.draw_bullet()
+        ship.blitme()
+        aliens.draw(screen)
+        
+        # Draw explosions
+        for explosion in explosions:
+            explosion.draw(screen)
+            
+        # Draw score information
+        sb.show_score()
+    else:
+        # Draw game over screen
+        font = pygame.font.SysFont(None, 74)
+        game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+        press_p_text = font.render("Press P to Play Again", True, (255, 255, 255))
+        
+        game_over_rect = game_over_text.get_rect()
+        press_p_rect = press_p_text.get_rect()
+        
+        game_over_rect.centerx = screen.get_rect().centerx
+        game_over_rect.centery = screen.get_rect().centery - 50
+        press_p_rect.centerx = screen.get_rect().centerx
+        press_p_rect.centery = screen.get_rect().centery + 50
+        
+        screen.blit(game_over_text, game_over_rect)
+        screen.blit(press_p_text, press_p_rect)
+        
+        # Show final score
+        sb.show_score()
+    
     pygame.display.flip()
+
+def start_game(ai_settings, screen, stats, sb, ship, aliens, bullets):
+    """Start a new game."""
+    # Reset game settings
+    ai_settings.initialize_dynamic_settings()
+    ai_settings.bullet_width = 3  # Reset bullet width to initial value
+    
+    # Reset game statistics
+    stats.reset_stats()
+    stats.game_active = True
+    sb.prep_score()
+    sb.prep_high_score()
+    sb.prep_level()
+    sb.prep_ships()
+    
+    # Empty the list of aliens and bullets
+    aliens.empty()
+    bullets.empty()
+    
+    # Create a new fleet and center the ship
+    create_fleet(ai_settings, screen, ship, aliens)
+    ship.center_ship()
+    
+    # Hide the mouse cursor
+    pygame.mouse.set_visible(False)
