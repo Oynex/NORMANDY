@@ -1,12 +1,12 @@
 import pygame
-from .settings import Settings
-from .ship import Ship
-from . import game_functions as gf
+from settings import Settings
+from ship import Ship
+import game_functions as gf
 from pygame.sprite import Group
-from .alien import Alien
-from .game_stats import GameStats
-from .button import Button
-from .ui import Scoreboard
+from alien import Alien
+from game_stats import GameStats
+from button import Button
+from ui import Scoreboard
 
 def rundagame():
     # start pygame and the setting thingy
