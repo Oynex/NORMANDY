@@ -5,7 +5,7 @@ import game_functions as gf
 from pygame.sprite import Group
 from alien import Alien
 from game_stats import GameStats
-from ui import Scoreboard
+from scoreboard import Scoreboard
 import time
 
 def rundagame():
@@ -45,7 +45,7 @@ def rundagame():
         pulse_value = pulse_min
         
         # Create a rotating ship preview
-        ship_preview = Ship(ai_settings, screen)
+        ship_preview = Ship(ai_settings, screen, is_player=False)
         ship_preview.rect.centerx = ai_settings.screen_width // 2
         ship_preview.rect.centery = ai_settings.screen_height // 2
         rotation_angle = 0
