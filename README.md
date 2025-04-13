@@ -11,6 +11,7 @@ A Python-based space shooter game built with Pygame.
 pip install pygame
 ```
 =======
+
 2. Run the game:
 ```bash
 python normandy.py
